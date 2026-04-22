@@ -296,12 +296,12 @@ Checkpoints are hosted on HuggingFace under
 
 | Model | Dataset | Fold | Release Name | ADE (K=20) | FDE (K=20) | Checkpoint |
 |-------|---------|------|-------------|------------|------------|------------|
-| BiFlow | EgoTraj-TBD | tbd | `EgoTraj-TBD` | — | — | Coming Soon |
-| BiFlow | T2FPV-ETH | eth | `T2FPV-eth` | — | — | [HF](https://huggingface.co/datasets/ZoeyLIU1999/EgoTraj-Bench/tree/main/models/T2FPV-eth) |
-| BiFlow | T2FPV-ETH | hotel | `T2FPV-hotel` | — | — | [HF](https://huggingface.co/datasets/ZoeyLIU1999/EgoTraj-Bench/tree/main/models/T2FPV-hotel) |
-| BiFlow | T2FPV-ETH | univ | `T2FPV-univ` | — | — | [HF](https://huggingface.co/datasets/ZoeyLIU1999/EgoTraj-Bench/tree/main/models/T2FPV-univ) |
-| BiFlow | T2FPV-ETH | zara1 | `T2FPV-zara1` | — | — | [HF](https://huggingface.co/datasets/ZoeyLIU1999/EgoTraj-Bench/tree/main/models/T2FPV-zara1) |
-| BiFlow | T2FPV-ETH | zara2 | `T2FPV-zara2` | — | — | [HF](https://huggingface.co/datasets/ZoeyLIU1999/EgoTraj-Bench/tree/main/models/T2FPV-zara2) |
+| BiFlow | EgoTraj-TBD | tbd | `EgoTraj-TBD` | 0.19 | 0.27 | Coming Soon |
+| BiFlow | T2FPV-ETH | eth | `T2FPV-eth` | 0.66 | 0.85 | [HF](https://huggingface.co/datasets/ZoeyLIU1999/EgoTraj-Bench/tree/main/models/T2FPV-eth) |
+| BiFlow | T2FPV-ETH | hotel | `T2FPV-hotel` | 0.49 | 0.59 | [HF](https://huggingface.co/datasets/ZoeyLIU1999/EgoTraj-Bench/tree/main/models/T2FPV-hotel) |
+| BiFlow | T2FPV-ETH | univ | `T2FPV-univ` | 0.91 | 1.08 | [HF](https://huggingface.co/datasets/ZoeyLIU1999/EgoTraj-Bench/tree/main/models/T2FPV-univ) |
+| BiFlow | T2FPV-ETH | zara1 | `T2FPV-zara1` | 0.42 | 0.58 | [HF](https://huggingface.co/datasets/ZoeyLIU1999/EgoTraj-Bench/tree/main/models/T2FPV-zara1) |
+| BiFlow | T2FPV-ETH | zara2 | `T2FPV-zara2` | 0.50 | 0.62 | [HF](https://huggingface.co/datasets/ZoeyLIU1999/EgoTraj-Bench/tree/main/models/T2FPV-zara2) |
 
 ### Downloading
 

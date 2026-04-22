@@ -9,7 +9,7 @@ dist/
 build/
 
 # Data
-data/
+data/*
 raw/
 !data/_download_data.py
 !data/_download_ckpt.py
