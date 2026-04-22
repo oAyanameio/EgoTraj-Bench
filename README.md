@@ -142,16 +142,20 @@ The EgoTraj-Bench dataset is available on HuggingFace:
 
 ### Data Format
 
+Training and evaluation use the **L2-processed** (minimal reproducible) set.
 Each `.npz` file contains 4 arrays:
 
 | Key | Shape | Description |
 |-----|-------|-------------|
 | `all_obs` | `[N, 8, 7]` | Noisy FPV-derived past trajectories |
 | `all_pred` | `[N, 20, 7]` | Clean BEV ground truth (8 past + 12 future) |
-| `num_peds` | `[S]` | Number of agents in each scene |
-| `seq_start_end` | `[S, 2]` | Scene boundaries in agent dimension |
+| `num_peds` | `[S]` | Number of agents per sequence |
+| `seq_start_end` | `[S, 2]` | Sequence index boundaries in the agent dimension |
 
-7 features = `[x, y, orientation, img_x, img_y, valid_mask, agent_id]`
+7 features per timestep: `[x, y, orientation, img_x, img_y, valid_mask, agent_id]`
+
+> **Note**: L2-processed is sufficient for full training/evaluation reproduction.
+> L1-intermediate (FPV detections, BEV GT CSVs, matching results) will be released later for full pipeline analysis.
 
 ### Quick Example
 
@@ -318,19 +322,15 @@ Files are placed directly under `checkpoints/<release_name>/` — no intermediat
 
 ### Evaluating Release Checkpoints
 
-Use `--release_name` (auto-resolves to `checkpoints/<release_name>`):
-
 ```bash
-# T2FPV folds
-bash scripts/run_eval.sh --fold_name eth   --release_name T2FPV-eth   --gpu 0
-bash scripts/run_eval.sh --fold_name hotel --release_name T2FPV-hotel --gpu 0
-bash scripts/run_eval.sh --fold_name univ  --release_name T2FPV-univ  --gpu 0
-bash scripts/run_eval.sh --fold_name zara1 --release_name T2FPV-zara1 --gpu 0
-bash scripts/run_eval.sh --fold_name zara2 --release_name T2FPV-zara2 --gpu 0
+# All T2FPV folds at once
+bash scripts/run_eval_all.sh --source release --gpu 0
 
-# EgoTraj-TBD (once released)
-bash scripts/run_eval.sh --fold_name tbd --release_name EgoTraj-TBD --gpu 0
+# Single fold (example)
+bash scripts/run_eval.sh --fold_name zara2 --release_name T2FPV-zara2 --gpu 0
 ```
+
+See [Evaluation](#evaluation) for the full flag reference.
 
 ---
 
