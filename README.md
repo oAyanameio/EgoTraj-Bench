@@ -71,7 +71,6 @@
 EgoTraj-Bench/
 ├── cfg/
 │   ├── biflow_k20.yml
-│   ├── biflow_k5.yml
 │   └── biflow_t2fpv_k20.yml
 ├── data/
 │   ├── _download_data.py

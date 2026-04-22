@@ -17,9 +17,6 @@
 #      - Example:
 #        bash scripts/run_eval.sh --ckpt_dir results/biflow_t2fpv_k20/<run_name> --fold_name eth
 #
-#   D) TBD K=5 example (results source)
-#      bash scripts/run_eval.sh --fold_name tbd --cfg_name biflow_k5 --run_name train_v1_tbd_orig_FM_SharedFuser_K5_EP150_BS32_LR0.0001
-#
 #   # mode behavior
 #   #   (default)       -> eval_biflow.py --mode best (load checkpoint_best.pt)
 #   #   --mode best     -> load checkpoint_best.pt
@@ -60,12 +57,7 @@ done
 # ---------- infer cfg_name ----------
 if [ -z "$CFG_NAME" ]; then
     if [ "$FOLD_NAME" = "tbd" ]; then
-        # Auto-route TBD K=5 runs if run_name carries K5.
-        if [ -n "$RUN_NAME" ] && [[ "$RUN_NAME" == *"_K5_"* ]]; then
-            CFG_NAME="biflow_k5"
-        else
-            CFG_NAME="biflow_k20"
-        fi
+        CFG_NAME="biflow_k20"
     else
         CFG_NAME="biflow_t2fpv_k20"
     fi

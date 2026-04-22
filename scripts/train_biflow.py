@@ -376,11 +376,8 @@ def init_basics(args, tag_prefix=None):
     """Load the config file"""
     cfg = Config(args.cfg, f"{args.exp}")
 
-    # Keep K-list behavior from existing launch conventions.
-    if tag_prefix is not None and "k5" in tag_prefix:
-        cfg.K_LIST = [1, 5]
-    else:
-        cfg.K_LIST = [1, 3, 5, 20]
+    # Keep K-list from config (release path only keeps K=20 configs).
+    cfg.K_LIST = cfg.get("K_LIST", [1, 3, 5, 20])
     cfg.USE_CLEAN_HIST = bool(tag_prefix is not None and "cln" in tag_prefix)
 
     # Sequential config overrides (flattened, no nested update helpers).
