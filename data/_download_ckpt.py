@@ -15,7 +15,7 @@ Expected remote layout:
       ...
     T2FPV-zara2/
       ...
-    EgoTraj-TBD/  # optional
+    EgoTraj-TBD/
       ...
 
 Local output layout (default):
@@ -43,8 +43,8 @@ DEFAULT_RELEASES = [
     "T2FPV-univ",
     "T2FPV-zara1",
     "T2FPV-zara2",
+    "EgoTraj-TBD",
 ]
-TBD_RELEASE = "EgoTraj-TBD"
 
 
 def parse_args() -> argparse.Namespace:
@@ -57,11 +57,6 @@ def parse_args() -> argparse.Namespace:
         type=Path,
         default=DEFAULT_OUTPUT_ROOT,
         help=f"Local checkpoint root (default: {DEFAULT_OUTPUT_ROOT})",
-    )
-    parser.add_argument(
-        "--include-tbd",
-        action="store_true",
-        help="Also download EgoTraj-TBD checkpoint",
     )
     parser.add_argument(
         "--token",
@@ -110,8 +105,6 @@ def main() -> None:
     output_root: Path = args.output_root
 
     releases = list(DEFAULT_RELEASES)
-    if args.include_tbd:
-        releases.append(TBD_RELEASE)
 
     print("Source repo:", args.repo_id)
     print("Output root:", output_root.resolve())

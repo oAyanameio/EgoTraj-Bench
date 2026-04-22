@@ -295,7 +295,7 @@ Checkpoints are hosted on HuggingFace under
 
 | Model | Dataset | Fold | Release Name | ADE (K=20) | FDE (K=20) | Checkpoint |
 |-------|---------|------|-------------|------------|------------|------------|
-| BiFlow | EgoTraj-TBD | tbd | `EgoTraj-TBD` | 0.19 | 0.27 | Coming Soon |
+| BiFlow | EgoTraj-TBD | tbd | `EgoTraj-TBD` | 0.19 | 0.27 | [HF](https://huggingface.co/datasets/ZoeyLIU1999/EgoTraj-Bench/tree/main/models/EgoTraj-TBD) |
 | BiFlow | T2FPV-ETH | eth | `T2FPV-eth` | 0.66 | 0.85 | [HF](https://huggingface.co/datasets/ZoeyLIU1999/EgoTraj-Bench/tree/main/models/T2FPV-eth) |
 | BiFlow | T2FPV-ETH | hotel | `T2FPV-hotel` | 0.49 | 0.59 | [HF](https://huggingface.co/datasets/ZoeyLIU1999/EgoTraj-Bench/tree/main/models/T2FPV-hotel) |
 | BiFlow | T2FPV-ETH | univ | `T2FPV-univ` | 0.91 | 1.08 | [HF](https://huggingface.co/datasets/ZoeyLIU1999/EgoTraj-Bench/tree/main/models/T2FPV-univ) |
@@ -307,11 +307,8 @@ Checkpoints are hosted on HuggingFace under
 Use the provided download script (from the repository root):
 
 ```bash
-# Download all T2FPV checkpoints to checkpoints/
+# Download all checkpoints to checkpoints/
 python data/_download_ckpt.py
-
-# Also include EgoTraj-TBD
-python data/_download_ckpt.py --include-tbd
 
 # Dry-run to preview which files will be fetched
 python data/_download_ckpt.py --dry-run
@@ -337,10 +334,9 @@ See [Evaluation](#evaluation) for the full flag reference.
 
 - [x] Release benchmark dataset and download instructions.
 - [x] Release benchmark code and repository structure.
-- [x] Release pretrained checkpoints (T2FPV folds).
-- [ ] Release pretrained checkpoint (EgoTraj-TBD).
-- [ ] Add detailed documentation for data format, metrics, and leaderboard.
-- [ ] Add examples and tutorials for using EgoTraj-Bench.
+- [x] Release pretrained checkpoints (T2FPV folds and EgoTraj-TBD).
+- [x] Add detailed documentation for data format, metrics, and leaderboard.
+- [x] Add examples and tutorials for using EgoTraj-Bench.
 
 ## 🔗 Citation
 

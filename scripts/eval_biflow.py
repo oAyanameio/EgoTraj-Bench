@@ -113,18 +113,21 @@ def parse_config():
     parser.add_argument(
         "--sampling_steps",
         type=int,
-        default=100,        help="Number of sampling timesteps for the FlowMatcher.",
+        default=100,
+        help="Number of sampling timesteps for the FlowMatcher.",
     )
     parser.add_argument(
         "--solver",
         type=str,
-        default="lin_poly",        choices=["euler", "lin_poly"],
+        default="lin_poly",
+        choices=["euler", "lin_poly"],
         help="Solver for the FlowMatcher.",
     )
     parser.add_argument(
         "--lin_poly_p",
         type=int,
-        default=5,        help="Degree of the polynomial in the linear stage.",
+        default=5,
+        help="Degree of the polynomial in the linear stage.",
     )
     parser.add_argument(
         "--lin_poly_long_step",
@@ -313,10 +316,8 @@ def build_network(cfg, args, logger):
     return denoiser
 
 
-def main():
-    """Main function to evaluate the BiFlow model."""
-
-    args = parse_config()
+def prepare_eval_context(args):
+    """Prepare runtime env, config, loaders, and evaluation mode."""
 
     os.environ["CUDA_VISIBLE_DEVICES"] = args.gpu
 
@@ -335,13 +336,23 @@ def main():
         eval_mode = int(eval_mode)
 
     cfg, logger, tb_log = init_basics(args)
-    cfg.K_LIST = [1, 5, 10, 20]
 
     if cfg.get("fut_traj_min", None) is None:
         # Old checkpoint without norm params in yml — must compute from train data
-        _train_loader, _val_loader, test_loader = build_data_loader(cfg, args, mode="train")
+        _train_loader, _val_loader, test_loader = build_data_loader(
+            cfg, args, mode="train"
+        )
     else:
         test_loader = build_data_loader(cfg, args, mode="eval")
+
+    return cfg, logger, tb_log, test_loader, eval_mode
+
+
+def main():
+    """Main function to evaluate the BiFlow model."""
+
+    args = parse_config()
+    cfg, logger, tb_log, test_loader, eval_mode = prepare_eval_context(args)
 
     denoiser = build_network(cfg, args, logger)
 

@@ -576,11 +576,8 @@ def build_network(cfg, args, logger):
     return denoiser
 
 
-def main():
-    """Main function to train the BiFlow model."""
-
-    args = parse_config()
-
+def prepare_train_context(args):
+    """Prepare runtime env, data loaders, and config for training."""
     os.environ["CUDA_VISIBLE_DEVICES"] = args.gpu
 
     # Auto-set data_dir and max_num_agents based on fold_name if not specified
@@ -604,6 +601,15 @@ def main():
     # regardless of how many random ops data loading consumed
     if args.fix_random_seed:
         set_random_seed(args.seed)
+
+    return cfg, logger, tb_log, train_loader, val_loader, test_loader
+
+
+def main():
+    """Main function to train the BiFlow model."""
+
+    args = parse_config()
+    cfg, logger, tb_log, train_loader, val_loader, test_loader = prepare_train_context(args)
 
     denoiser = build_network(cfg, args, logger)
 
