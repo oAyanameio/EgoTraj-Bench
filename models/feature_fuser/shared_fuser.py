@@ -1,3 +1,11 @@
+"""特征融合模块
+
+该模块实现了用于轨迹预测的特征融合功能，包括共享的特征融合层和条件注意力融合层。
+主要包含两个类：
+- SharedFuser：共享的特征融合模块，处理过去和未来轨迹的特征融合
+- CondAttnFuserS：条件注意力融合模块，用于融合噪声轨迹和上下文特征
+"""
+
 import torch
 import torch.nn as nn
 
@@ -7,23 +15,33 @@ from models.utils.common_layers import SinusoidalPosEmb
 
 
 class SharedFuser(nn.Module):
+    """共享特征融合模块
+    
+    处理过去和未来轨迹的特征融合，包含共享的位置编码和时间编码，以及分别处理过去和未来轨迹的分支。
+    """
     def __init__(self, config):
+        """初始化 SharedFuser
+        
+        Args:
+            config: 模型配置对象
+        """
         super(SharedFuser, self).__init__()
         self.config = config
-        self.past_frames = self.config.get("past_frames", 8)
-        self.future_frames = self.config.get("future_frames", 12)
+        self.past_frames = self.config.get("past_frames", 8)  # 过去帧数
+        self.future_frames = self.config.get("future_frames", 12)  # 未来帧数
 
         self.model_cfg = config.MODEL
-        self.dim = self.model_cfg.CONTEXT_ENCODER.D_MODEL
+        self.dim = self.model_cfg.CONTEXT_ENCODER.D_MODEL  # 特征维度
 
-        ###### shared layers ######
-        ### serves the purpose of positional encoding
+        # 共享层
+        # 用于位置编码
         self.motion_query_embedding = nn.Embedding(
             self.model_cfg.NUM_PROPOSED_QUERY, self.dim
-        )
+        )  # 运动查询嵌入
         self.agent_order_embedding = nn.Embedding(
             self.model_cfg.CONTEXT_ENCODER.AGENTS, self.dim
-        )
+        )  # 智能体顺序嵌入
+        # 位置编码后处理 MLP
         self.post_pe_cat_mlp = nn.Sequential(
             nn.Linear(self.dim, self.dim),
             nn.LayerNorm(self.dim),
@@ -31,9 +49,9 @@ class SharedFuser(nn.Module):
             nn.Linear(self.dim, self.dim),
         )
 
-        # time embedding
+        # 时间嵌入
         time_dim = self.dim * 1
-        sinu_pos_emb = SinusoidalPosEmb(self.dim, theta=10000)
+        sinu_pos_emb = SinusoidalPosEmb(self.dim, theta=10000)  # 正弦位置编码
 
         self.time_mlp = nn.Sequential(
             sinu_pos_emb,
@@ -42,13 +60,14 @@ class SharedFuser(nn.Module):
             nn.Linear(time_dim, time_dim),
         )
 
-        ###### separate branches ######
+        # 分离的分支
+        self.branch_embedding = nn.Embedding(2, self.dim)  # 分支嵌入（过去和未来）
 
-        self.branch_embedding = nn.Embedding(2, self.dim)
-
+        # 过去和未来分支的条件注意力融合器
         self.branch_pst = CondAttnFuserS(self.config, self.past_frames * 2)
         self.branch_fut = CondAttnFuserS(self.config, self.future_frames * 2)
 
+        # 如果过去分支的损失权重很小，则冻结其参数
         pst_frozen = self.config.OPTIMIZATION.LOSS_WEIGHTS["branch_past"] < 1e-6
         if pst_frozen:
             for p in self.branch_pst.parameters():
@@ -66,10 +85,30 @@ class SharedFuser(nn.Module):
         anchor_agent,
         anchor_scene,
     ):
+        """前向传播
+        
+        Args:
+            y_t_in: 未来轨迹输入，形状为 [B, K, A, D]
+            t_fut: 未来时间步，形状为 [B]
+            y_t_cond: 未来条件特征，形状为 [B, K, A, D]
+            x_t_in: 过去轨迹输入，形状为 [B, K, A, D]
+            t_pst: 过去时间步，形状为 [B]
+            x_t_cond: 过去条件特征，形状为 [B, K, A, D]
+            agent_mask: 智能体掩码，形状为 [B, A]
+            anchor_agent: 智能体锚点特征，形状为 [B, A, D]
+            anchor_scene: 场景锚点特征，形状为 [B, D]
+        
+        Returns:
+            query_token_fut: 未来查询令牌，形状为 [B, K, A, D]
+            query_token_pst: 过去查询令牌，形状为 [B, K, A, D]
+            y_t_emb_: 未来时间嵌入，形状为 [B, D]
+            x_t_emb_: 过去时间嵌入，形状为 [B, D]
+        """
         B, K, A, _ = y_t_in.shape
         t_fut_ = t_fut
         t_pst_ = t_pst
 
+        # 时间步缩放（用于 flow matching 方法）
         if self.config.denoising_method == "fm":
             t_fut_scale = t_fut * 1000.0
             t_pst_scale = t_pst * 1000.0
@@ -77,28 +116,34 @@ class SharedFuser(nn.Module):
             t_fut_scale = t_fut
             t_pst_scale = t_pst
 
+        # 计算时间嵌入
         x_t_emb_ = self.time_mlp(t_pst_scale)
         y_t_emb_ = self.time_mlp(t_fut_scale)
 
+        # 添加分支嵌入
         branch_id_emb = self.branch_embedding(
             torch.tensor([0, 1], device=y_t_in.device)
         )
         x_t_emb = x_t_emb_ + branch_id_emb[0].unsqueeze(0)
         y_t_emb = y_t_emb_ + branch_id_emb[1].unsqueeze(0)
 
+        # 扩展嵌入到批次维度
         x_t_emb_batch = repeat(x_t_emb, "b d -> b k a d", b=B, k=K, a=A)
         y_t_emb_batch = repeat(y_t_emb, "b d -> b k a d", b=B, k=K, a=A)
 
+        # 计算运动查询位置编码
         k_pe = self.motion_query_embedding(torch.arange(K, device=y_t_in.device))
         k_pe_batch = repeat(k_pe, "k d -> b k a d", b=B, a=A)
 
+        # 计算智能体顺序位置编码
         a_pe = self.agent_order_embedding(torch.arange(A, device=y_t_in.device))
         a_pe_batch = repeat(a_pe, "a d -> b k a d", b=B, k=K)
 
-        ### saparate modules
+        # 处理智能体掩码
         agent_mask_batch = repeat(agent_mask, "b a -> b k a", k=K)
         agent_mask_batch = rearrange(agent_mask_batch, "b k a -> (b k) a")
 
+        # 处理过去分支
         emb_fusion_pst = self.branch_pst(
             x_t_in,
             x_t_cond,
@@ -110,6 +155,7 @@ class SharedFuser(nn.Module):
             None,
             None,
         )
+        # 处理未来分支
         emb_fusion_fut = self.branch_fut(
             y_t_in,
             y_t_cond,
@@ -122,6 +168,7 @@ class SharedFuser(nn.Module):
             anchor_scene,
         )
 
+        # 后处理位置编码
         query_token_pst = self.post_pe_cat_mlp(emb_fusion_pst + k_pe_batch + a_pe_batch)
         query_token_fut = self.post_pe_cat_mlp(emb_fusion_fut + k_pe_batch + a_pe_batch)
 
@@ -129,13 +176,24 @@ class SharedFuser(nn.Module):
 
 
 class CondAttnFuserS(nn.Module):
+    """条件注意力融合模块
+    
+    用于融合噪声轨迹和上下文特征，包含多层注意力机制和特征融合。
+    """
     def __init__(self, config, in_dim):
+        """初始化 CondAttnFuserS
+        
+        Args:
+            config: 模型配置对象
+            in_dim: 输入特征维度
+        """
         super(CondAttnFuserS, self).__init__()
         self.model_cfg = config.MODEL
         self.dim = self.model_cfg.CONTEXT_ENCODER.D_MODEL
         time_dim = self.dim * 1
         self.config = config
 
+        # 噪声轨迹嵌入 MLP
         self.noisy_y_mlp = nn.Sequential(
             nn.Linear(in_dim, self.dim),
             nn.ReLU(),
@@ -144,7 +202,9 @@ class CondAttnFuserS(nn.Module):
             nn.Linear(self.dim, self.dim),
         )
 
+        # 注意力层
         dropout_ = self.model_cfg.MOTION_DECODER.DROPOUT_OF_ATTN
+        # 运动查询注意力层
         self.noisy_y_attn_k = nn.TransformerEncoderLayer(
             d_model=self.dim,
             nhead=4,
@@ -152,6 +212,7 @@ class CondAttnFuserS(nn.Module):
             dropout=dropout_,
             batch_first=True,
         )
+        # 智能体注意力层
         self.noisy_y_attn_a = nn.TransformerEncoderLayer(
             d_model=self.dim,
             nhead=4,
@@ -162,8 +223,11 @@ class CondAttnFuserS(nn.Module):
 
         dim_decoder = self.model_cfg.MOTION_DECODER.D_MODEL
 
+        # 是否使用锚点特征
         self.use_anchor = self.model_cfg.get("USE_ANCHOR", False)
+        # 融合维度
         fuse_dim = time_dim + self.dim * 2 + self.dim * int(self.use_anchor)
+        # 特征融合 MLP
         self.init_emb_fusion_mlp = nn.Sequential(
             nn.Linear(fuse_dim, self.dim),
             nn.LayerNorm(self.dim),
@@ -183,21 +247,42 @@ class CondAttnFuserS(nn.Module):
         anchor_agent,
         anchor_scene,
     ):
+        """前向传播
+        
+        Args:
+            y: 噪声轨迹输入，形状为 [B, K, A, D]
+            y_cond: 条件特征，形状为 [B, K, A, D]
+            time_: 时间步，形状为 [B]
+            agent_mask_batch: 智能体掩码，形状为 [(B*K), A]
+            t_emb_batch: 时间嵌入，形状为 [B, K, A, D]
+            k_pe_batch: 运动查询位置编码，形状为 [B, K, A, D]
+            a_pe_batch: 智能体顺序位置编码，形状为 [B, K, A, D]
+            anchor_agent: 智能体锚点特征，形状为 [B, A, D]
+            anchor_scene: 场景锚点特征，形状为 [B, D]
+        
+        Returns:
+            emb_fusion: 融合后的特征，形状为 [B, K, A, D]
+        """
         B, K, A, _ = y.shape
 
+        # 编码噪声轨迹
         y_emb = self.noisy_y_mlp(y)
+        # 添加位置编码
         y_emb = y_emb + k_pe_batch + a_pe_batch
 
+        # 运动查询维度注意力
         y_emb_k = rearrange(y_emb, "b k a d -> (b a) k d")
         y_emb_k = self.noisy_y_attn_k(y_emb_k)
         y_emb = rearrange(y_emb_k, "(b a) k d -> b k a d", b=B, a=A)
 
+        # 智能体维度注意力
         y_emb_a = rearrange(y_emb, "b k a d -> (b k) a d")
         y_emb_a = self.noisy_y_attn_a(
             y_emb_a, src_key_padding_mask=(agent_mask_batch == 0)
         )
         y_emb = rearrange(y_emb_a, "(b k) a d -> b k a d", b=B, k=K)
 
+        # 训练时的特征丢弃
         if self.training and self.config.get("drop_method", None) == "emb":
             assert (
                 self.config.get("drop_logi_k", None) is not None
@@ -208,14 +293,17 @@ class CondAttnFuserS(nn.Module):
             p_m = p_m[:, None, None, None]
             y_emb = y_emb.masked_fill(torch.rand_like(p_m) < p_m, 0.0)
 
+        # 准备融合的特征列表
         concat_list = [y_cond, y_emb, t_emb_batch]
 
+        # 如果使用锚点特征
         if self.use_anchor:
             if anchor_agent is None:
                 anchor_agent = torch.zeros(B, A, self.dim, device=y_emb.device)
             if anchor_scene is None:
                 anchor_scene = torch.zeros(B, self.dim, device=y_emb.device)
 
+            # 处理锚点特征
             agent_mask = rearrange(agent_mask_batch, "(b k) a -> b k a", k=K)
             anchor_agent = repeat(
                 anchor_agent, "b a d -> b k a d", k=K
@@ -224,5 +312,6 @@ class CondAttnFuserS(nn.Module):
             anchor_ = anchor_agent + anchor_scene
             concat_list.append(anchor_)
 
+        # 融合特征
         emb_fusion = self.init_emb_fusion_mlp(torch.cat(concat_list, dim=-1))
         return emb_fusion

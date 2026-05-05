@@ -1,0 +1,181 @@
+nohup: ignoring input
+=== BiFlow Training ===
+  fold_name : pie
+  cfg       : cfg/biflow_pie.yml
+  data_dir  : ./data/pie
+  gpu       : 3
+========================
+2026-05-05 13:02:25,743   INFO  New key ROOT ---> /home/lbh/EgoTraj-Bench
+2026-05-05 13:02:25,744   INFO  New key USE_CLEAN_HIST ---> False
+2026-05-05 13:02:25,744   INFO  New key cfg_dir ---> results/biflow_pie/train_v1_pie_orig_FM_SharedFuser_K20_EP50_BS32_LR0.0001
+2026-05-05 13:02:25,744   INFO  New key cfg_name ---> biflow_pie
+2026-05-05 13:02:25,744   INFO  New key cfg_path ---> cfg/biflow_pie.yml
+2026-05-05 13:02:25,744   INFO  New key device ---> cuda
+2026-05-05 13:02:25,744   INFO  New key fm_rew_sqrt ---> False
+2026-05-05 13:02:25,744   INFO  New key fold_name ---> pie
+2026-05-05 13:02:25,744   INFO  New key log_dir ---> results/biflow_pie/train_v1_pie_orig_FM_SharedFuser_K20_EP50_BS32_LR0.0001/log
+2026-05-05 13:02:25,744   INFO  New key model_dir ---> results/biflow_pie/train_v1_pie_orig_FM_SharedFuser_K20_EP50_BS32_LR0.0001/models
+2026-05-05 13:02:25,744   INFO  New key model_files ---> []
+2026-05-05 13:02:25,744   INFO  New key model_path ---> results/biflow_pie/train_v1_pie_orig_FM_SharedFuser_K20_EP50_BS32_LR0.0001/models/model_%04d.p
+2026-05-05 13:02:25,744   INFO  New key sample_dir ---> results/biflow_pie/train_v1_pie_orig_FM_SharedFuser_K20_EP50_BS32_LR0.0001/samples
+2026-05-05 13:02:25,744   INFO  New key tag ---> train
+2026-05-05 13:02:25,744   INFO  New key train_mode ---> True
+2026-05-05 13:02:25,759   INFO  git hash: ca36747c25c6f41b03573bf1be90f36f06853119
+2026-05-05 13:02:25,764   INFO  Code is backedup to results/biflow_pie/train_v1_pie_orig_FM_SharedFuser_K20_EP50_BS32_LR0.0001/code_backup
+2026-05-05 13:02:25,764   INFO  ==================== Config cfg_yml details below ====================
+2026-05-05 13:02:25,764   INFO  cfg_yml.description: BiFlow with PIE Dataset
+2026-05-05 13:02:25,764   INFO  cfg_yml.results_root_dir: results
+2026-05-05 13:02:25,764   INFO  cfg_yml.dataset: pie
+2026-05-05 13:02:25,764   INFO  cfg_yml.past_frames: 8
+2026-05-05 13:02:25,764   INFO  cfg_yml.future_frames: 12
+2026-05-05 13:02:25,764   INFO  cfg_yml.checkpt_freq: 1
+2026-05-05 13:02:25,764   INFO  cfg_yml.denoising_method: fm
+2026-05-05 13:02:25,764   INFO  cfg_yml.sampling_steps: 10
+2026-05-05 13:02:25,764   INFO  cfg_yml.t_schedule: logit_normal
+2026-05-05 13:02:25,764   INFO  cfg_yml.objective: pred_data
+2026-05-05 13:02:25,764   INFO  cfg_yml.sigma_data: 0.13
+2026-05-05 13:02:25,764   INFO  cfg_yml.logit_norm_mean: -0.5
+2026-05-05 13:02:25,764   INFO  cfg_yml.logit_norm_std: 1.5
+2026-05-05 13:02:25,764   INFO  cfg_yml.fm_in_scaling: True
+2026-05-05 13:02:25,764   INFO  cfg_yml.fm_wrapper: direct
+2026-05-05 13:02:25,764   INFO  cfg_yml.data_norm: min_max
+2026-05-05 13:02:25,764   INFO  cfg_yml.rotate: True
+2026-05-05 13:02:25,764   INFO  cfg_yml.rotate_time_frame: 6
+2026-05-05 13:02:25,764   INFO  cfg_yml.drop_method: emb
+2026-05-05 13:02:25,764   INFO  cfg_yml.drop_logi_m: 0.5
+2026-05-05 13:02:25,764   INFO  cfg_yml.drop_logi_k: 20.0
+2026-05-05 13:02:25,764   INFO  cfg_yml.tied_noise: True
+2026-05-05 13:02:25,764   INFO  cfg_yml.K_LIST: [1, 3, 5, 20]
+2026-05-05 13:02:25,764   INFO  cfg_yml.LOSS_NN_MODE: agent
+2026-05-05 13:02:25,764   INFO  cfg_yml.LOSS_REG_REDUCTION: sum
+2026-05-05 13:02:25,764   INFO  cfg_yml.notes: BiFlow with PIE Dataset
+2026-05-05 13:02:25,764   INFO  --- cfg_yml.MODEL = edict() ---
+2026-05-05 13:02:25,764   INFO  ==================== Config cfg_yml.MODEL details below ====================
+2026-05-05 13:02:25,764   INFO  cfg_yml.MODEL.NUM_PROPOSED_QUERY: 20
+2026-05-05 13:02:25,765   INFO  cfg_yml.MODEL.MODEL_OUT_DIM: 24
+2026-05-05 13:02:25,765   INFO  cfg_yml.MODEL.MODEL_IN_DIM: 16
+2026-05-05 13:02:25,765   INFO  cfg_yml.MODEL.REGRESSION_MLPS: [128, 256, 24]
+2026-05-05 13:02:25,765   INFO  cfg_yml.MODEL.RECONSTRUCTION_MLPS: [128, 256, 16]
+2026-05-05 13:02:25,765   INFO  cfg_yml.MODEL.CLASSIFICATION_MLPS: [128, 128, 1]
+2026-05-05 13:02:25,765   INFO  cfg_yml.MODEL.PAST_TRAJ_MODE: social_context_regen
+2026-05-05 13:02:25,765   INFO  cfg_yml.MODEL.USE_MASK: True
+2026-05-05 13:02:25,765   INFO  cfg_yml.MODEL.USE_IMPUTATION: True
+2026-05-05 13:02:25,765   INFO  cfg_yml.MODEL.USE_HIST_COND: True
+2026-05-05 13:02:25,765   INFO  cfg_yml.MODEL.USE_ANCHOR: True
+2026-05-05 13:02:25,765   INFO  --- cfg_yml.MODEL.CONTEXT_ENCODER = edict() ---
+2026-05-05 13:02:25,765   INFO  ==================== Config cfg_yml.MODEL.CONTEXT_ENCODER details below ====================
+2026-05-05 13:02:25,765   INFO  cfg_yml.MODEL.CONTEXT_ENCODER.NAME: ContextEncoderScore
+2026-05-05 13:02:25,765   INFO  cfg_yml.MODEL.CONTEXT_ENCODER.NUM_INPUT_CONTEXT: 6
+2026-05-05 13:02:25,765   INFO  cfg_yml.MODEL.CONTEXT_ENCODER.AGENTS: 16
+2026-05-05 13:02:25,765   INFO  cfg_yml.MODEL.CONTEXT_ENCODER.NUM_CHANNEL_IN_MLP_AGENT: 256
+2026-05-05 13:02:25,765   INFO  cfg_yml.MODEL.CONTEXT_ENCODER.NUM_LAYER_IN_MLP_AGENT: 3
+2026-05-05 13:02:25,765   INFO  cfg_yml.MODEL.CONTEXT_ENCODER.D_MODEL: 128
+2026-05-05 13:02:25,765   INFO  cfg_yml.MODEL.CONTEXT_ENCODER.NUM_ATTN_LAYERS: 4
+2026-05-05 13:02:25,765   INFO  cfg_yml.MODEL.CONTEXT_ENCODER.NUM_ATTN_HEAD: 8
+2026-05-05 13:02:25,765   INFO  cfg_yml.MODEL.CONTEXT_ENCODER.DROPOUT_OF_ATTN: 0.1
+2026-05-05 13:02:25,765   INFO  -------------------- Config cfg_yml.MODEL.CONTEXT_ENCODER details above --------------------
+2026-05-05 13:02:25,765   INFO  --- cfg_yml.MODEL.MOTION_DECODER = edict() ---
+2026-05-05 13:02:25,765   INFO  ==================== Config cfg_yml.MODEL.MOTION_DECODER details below ====================
+2026-05-05 13:02:25,765   INFO  cfg_yml.MODEL.MOTION_DECODER.NAME: MotionDecoderScore
+2026-05-05 13:02:25,765   INFO  cfg_yml.MODEL.MOTION_DECODER.D_MODEL: 128
+2026-05-05 13:02:25,765   INFO  cfg_yml.MODEL.MOTION_DECODER.NUM_DECODER_BLOCKS: 4
+2026-05-05 13:02:25,765   INFO  cfg_yml.MODEL.MOTION_DECODER.NUM_ATTN_HEAD: 8
+2026-05-05 13:02:25,765   INFO  cfg_yml.MODEL.MOTION_DECODER.DROPOUT_OF_ATTN: 0.1
+2026-05-05 13:02:25,765   INFO  -------------------- Config cfg_yml.MODEL.MOTION_DECODER details above --------------------
+2026-05-05 13:02:25,765   INFO  cfg_yml.MODEL.FUSER_NAME: SharedFuser
+2026-05-05 13:02:25,765   INFO  cfg_yml.MODEL.past_frames: 8
+2026-05-05 13:02:25,765   INFO  cfg_yml.MODEL.future_frames: 12
+2026-05-05 13:02:25,765   INFO  cfg_yml.MODEL.USE_PRE_NORM: False
+2026-05-05 13:02:25,765   INFO  cfg_yml.MODEL.NUM_LAYERS: None
+2026-05-05 13:02:25,765   INFO  cfg_yml.MODEL.DROPOUT: None
+2026-05-05 13:02:25,765   INFO  -------------------- Config cfg_yml.MODEL details above --------------------
+2026-05-05 13:02:25,765   INFO  cfg_yml.approx_t_std: 0.05
+2026-05-05 13:02:25,765   INFO  cfg_yml.denoising_head_preds: 20
+2026-05-05 13:02:25,765   INFO  cfg_yml.k_preds: 20
+2026-05-05 13:02:25,765   INFO  cfg_yml.max_num_ckpts: 5
+2026-05-05 13:02:25,765   INFO  cfg_yml.train_batch_size: 32
+2026-05-05 13:02:25,765   INFO  cfg_yml.val_batch_size: 32
+2026-05-05 13:02:25,765   INFO  cfg_yml.test_batch_size: 64
+2026-05-05 13:02:25,765   INFO  --- cfg_yml.OPTIMIZATION = edict() ---
+2026-05-05 13:02:25,765   INFO  ==================== Config cfg_yml.OPTIMIZATION details below ====================
+2026-05-05 13:02:25,765   INFO  cfg_yml.OPTIMIZATION.NUM_EPOCHS: 50
+2026-05-05 13:02:25,765   INFO  cfg_yml.OPTIMIZATION.OPTIMIZER: AdamW
+2026-05-05 13:02:25,765   INFO  cfg_yml.OPTIMIZATION.LR: 0.0001
+2026-05-05 13:02:25,765   INFO  cfg_yml.OPTIMIZATION.WEIGHT_DECAY: 0.01
+2026-05-05 13:02:25,765   INFO  cfg_yml.OPTIMIZATION.SCHEDULER: cosineAnnealingLRwithWarmup
+2026-05-05 13:02:25,765   INFO  cfg_yml.OPTIMIZATION.LR_CLIP: 1e-06
+2026-05-05 13:02:25,765   INFO  cfg_yml.OPTIMIZATION.GRAD_NORM_CLIP: 1.0
+2026-05-05 13:02:25,765   INFO  --- cfg_yml.OPTIMIZATION.LOSS_WEIGHTS = edict() ---
+2026-05-05 13:02:25,765   INFO  ==================== Config cfg_yml.OPTIMIZATION.LOSS_WEIGHTS details below ====================
+2026-05-05 13:02:25,765   INFO  cfg_yml.OPTIMIZATION.LOSS_WEIGHTS.cls: 1.0
+2026-05-05 13:02:25,765   INFO  cfg_yml.OPTIMIZATION.LOSS_WEIGHTS.reg: 1.0
+2026-05-05 13:02:25,765   INFO  cfg_yml.OPTIMIZATION.LOSS_WEIGHTS.vel: 0.2
+2026-05-05 13:02:25,765   INFO  cfg_yml.OPTIMIZATION.LOSS_WEIGHTS.branch_past: 0.5
+2026-05-05 13:02:25,765   INFO  -------------------- Config cfg_yml.OPTIMIZATION.LOSS_WEIGHTS details above --------------------
+2026-05-05 13:02:25,766   INFO  -------------------- Config cfg_yml.OPTIMIZATION details above --------------------
+2026-05-05 13:02:25,766   INFO  --- cfg_yml.RESUME = edict() ---
+2026-05-05 13:02:25,766   INFO  ==================== Config cfg_yml.RESUME details below ====================
+2026-05-05 13:02:25,766   INFO  cfg_yml.RESUME.resume: False
+2026-05-05 13:02:25,766   INFO  cfg_yml.RESUME.ckpt_name: checkpoint_last
+2026-05-05 13:02:25,766   INFO  cfg_yml.RESUME.start_epoch: 150
+2026-05-05 13:02:25,766   INFO  cfg_yml.RESUME.early_stop: -1
+2026-05-05 13:02:25,766   INFO  -------------------- Config cfg_yml.RESUME details above --------------------
+2026-05-05 13:02:25,766   INFO  cfg_yml.ROOT: /home/lbh/EgoTraj-Bench
+2026-05-05 13:02:25,766   INFO  cfg_yml.USE_CLEAN_HIST: False
+2026-05-05 13:02:25,766   INFO  cfg_yml.cfg_dir: results/biflow_pie/train_v1_pie_orig_FM_SharedFuser_K20_EP50_BS32_LR0.0001
+2026-05-05 13:02:25,766   INFO  cfg_yml.cfg_name: biflow_pie
+2026-05-05 13:02:25,766   INFO  cfg_yml.cfg_path: cfg/biflow_pie.yml
+2026-05-05 13:02:25,766   INFO  cfg_yml.device: cuda
+2026-05-05 13:02:25,766   INFO  cfg_yml.fm_rew_sqrt: False
+2026-05-05 13:02:25,766   INFO  cfg_yml.fold_name: pie
+2026-05-05 13:02:25,766   INFO  cfg_yml.log_dir: results/biflow_pie/train_v1_pie_orig_FM_SharedFuser_K20_EP50_BS32_LR0.0001/log
+2026-05-05 13:02:25,766   INFO  cfg_yml.model_dir: results/biflow_pie/train_v1_pie_orig_FM_SharedFuser_K20_EP50_BS32_LR0.0001/models
+2026-05-05 13:02:25,766   INFO  cfg_yml.model_files: []
+2026-05-05 13:02:25,766   INFO  cfg_yml.model_path: results/biflow_pie/train_v1_pie_orig_FM_SharedFuser_K20_EP50_BS32_LR0.0001/models/model_%04d.p
+2026-05-05 13:02:25,766   INFO  cfg_yml.sample_dir: results/biflow_pie/train_v1_pie_orig_FM_SharedFuser_K20_EP50_BS32_LR0.0001/samples
+2026-05-05 13:02:25,766   INFO  cfg_yml.tag: train
+2026-05-05 13:02:25,766   INFO  cfg_yml.train_mode: True
+2026-05-05 13:02:25,766   INFO  -------------------- Config cfg_yml details above --------------------
+2026-05-05 13:02:25,903   INFO  Total parameters: 7,191,850, Encoder: 2,312,448, Fuser: 1,100,544, Decoder_fut: 1,851,392, Decoder_pst: 1,718,272, Other: 209,194
+[RANK 0] Detected kernel version 5.4.0, which is below the recommended minimum of 5.5.0; this can cause the process to hang. It is recommended to upgrade the kernel to the minimum version or higher.
+2026-05-05 13:02:29,203   INFO  [Stage One Model] Trainable/Total Params: 7191850/7191850
+2026-05-05 13:02:29,203   INFO  training start
+Using root directory: /home/lbh/EgoTraj-Bench
+  0%|          | 0/12500 [00:00<?, ?it/s]  0%|          | 0/12500 [00:00<?, ?it/s]
+Traceback (most recent call last):
+  File "/home/lbh/EgoTraj-Bench/scripts/train_biflow.py", line 702, in <module>
+    main()
+    ~~~~^^
+  File "/home/lbh/EgoTraj-Bench/scripts/train_biflow.py", line 698, in main
+    trainer.train()
+    ~~~~~~~~~~~~~^^
+  File "/home/lbh/EgoTraj-Bench/trainer/biflow_trainer.py", line 444, in train
+    data = {k: v.to(self.device) for k, v in next(self.dl).items()}
+                                             ~~~~^^^^^^^^^
+  File "/home/lbh/EgoTraj-Bench/trainer/biflow_trainer.py", line 55, in cycle
+    for data in dl:
+                ^^
+  File "/home/lbh/.local/lib/python3.13/site-packages/accelerate/data_loader.py", line 577, in __iter__
+    current_batch = next(dataloader_iter)
+  File "/home/lbh/.local/lib/python3.13/site-packages/torch/utils/data/dataloader.py", line 732, in __next__
+    data = self._next_data()
+  File "/home/lbh/.local/lib/python3.13/site-packages/torch/utils/data/dataloader.py", line 1506, in _next_data
+    return self._process_data(data, worker_id)
+           ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "/home/lbh/.local/lib/python3.13/site-packages/torch/utils/data/dataloader.py", line 1541, in _process_data
+    data.reraise()
+    ~~~~~~~~~~~~^^
+  File "/home/lbh/.local/lib/python3.13/site-packages/torch/_utils.py", line 769, in reraise
+    raise exception
+RuntimeError: Caught RuntimeError in DataLoader worker process 0.
+Original Traceback (most recent call last):
+  File "/home/lbh/.local/lib/python3.13/site-packages/torch/utils/data/_utils/worker.py", line 349, in _worker_loop
+    data = fetcher.fetch(index)  # type: ignore[possibly-undefined]
+  File "/home/lbh/.local/lib/python3.13/site-packages/torch/utils/data/_utils/fetch.py", line 55, in fetch
+    return self.collate_fn(data)
+           ~~~~~~~~~~~~~~~^^^^^^
+  File "/home/lbh/EgoTraj-Bench/loaders/dataloader_egotraj.py", line 112, in seq_collate_egotraj
+    pre_motion_3D = torch.stack(past_traj_list, dim=0).squeeze(
+                    ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+RuntimeError: stack expects each tensor to be equal size, but got [0, 1, 8, 6] at entry 0 and [1, 1, 8, 6] at entry 2
+

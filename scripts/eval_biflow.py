@@ -1,3 +1,9 @@
+"""BiFlow 模型评估脚本
+
+该脚本用于评估 BiFlow 轨迹预测模型，包括参数解析、配置初始化、数据加载器构建、
+网络构建和评估过程等功能。
+"""
+
 import os
 import torch
 import argparse
@@ -24,142 +30,151 @@ from trainer.biflow_trainer import BiFlowTrainer
 
 
 def parse_config():
-    """
-    Parse the command line arguments and return the configuration options.
+    """解析命令行参数并返回配置选项
+    
+    Returns:
+        解析后的命令行参数
     """
 
     parser = argparse.ArgumentParser()
 
-    # Basic configuration
+    # 基本配置
     parser.add_argument(
         "--ckpt_dir",
         type=str,
         default=None,
-        help="Directory to the checkpoint to load the model from.",
+        help="加载模型的检查点目录。",
     )
-    parser.add_argument("--cfg", default="auto", type=str, help="Config file path")
+    parser.add_argument("--cfg", default="auto", type=str, help="配置文件路径")
     parser.add_argument(
         "--exp",
         default="tbd_eval",
         type=str,
-        help="Experiment description for each run, name of the saving folder.",
+        help="每次运行的实验描述，保存文件夹的名称。",
     )
-    # Data configuration
+    # 数据配置
     parser.add_argument(
         "--fold_name",
         default="tbd",
         type=str,
-        help="Fold name for the experiment.",
+        help="实验的折叠名称。",
     )
     parser.add_argument(
         "--data_source",
         default="original",
         type=str,
         choices=["original", "original_bal"],
-        help="Data source: 'original' for EgoTraj-TBD, 'original_bal' for T2FPV-ETH.",
+        help="数据源: 'original' 用于 EgoTraj-TBD, 'original_bal' 用于 T2FPV-ETH。",
     )
     parser.add_argument(
         "--batch_size",
         default=512,
         type=int,
-        help="Override the batch size in the config file.",
+        help="覆盖配置文件中的批大小。",
     )
     parser.add_argument(
         "--data_dir",
         type=str,
         default=None,
-        help="Directory where the data is stored. Auto-set based on fold_name if not specified.",
+        help="数据存储的目录。如果未指定，将根据 fold_name 自动设置。",
     )
     parser.add_argument(
         "--gpu",
         type=str,
         default="0",
-        help="GPU device ID to use.",
+        help="要使用的 GPU 设备 ID。",
     )
     parser.add_argument(
         "--data_norm",
         default="min_max",
         choices=["min_max", "original"],
-        help="Normalization method for the data.",
+        help="数据的归一化方法。",
     )
     parser.add_argument(
         "--rotate",
         type=bool,
         default=True,
-        help="Whether to rotate the trajectories in the dataset",
+        help="是否旋转数据集中的轨迹",
     )
     parser.add_argument(
         "--rotate_time_frame",
         type=int,
         default=6,
-        help="Index of time frames to rotate the trajectories.",
+        help="旋转轨迹的时间帧索引。",
     )
 
-    # Reproducibility configuration
+    # 可复现性配置
     parser.add_argument(
         "--fix_random_seed",
         action="store_true",
         default=False,
-        help="fix random seed for reproducibility",
+        help="固定随机种子以确保可复现性",
     )
     parser.add_argument(
         "--seed",
         type=int,
         default=9527,
-        help="Set the random seed to split the testing set for training evaluation.",
+        help="设置随机种子以分割测试集用于训练评估。",
     )
 
-    ### FM parameters ###
+    ### FM 参数 ###
     parser.add_argument(
         "--sampling_steps",
         type=int,
         default=100,
-        help="Number of sampling timesteps for the FlowMatcher.",
+        help="FlowMatcher 的采样时间步数。",
     )
     parser.add_argument(
         "--solver",
         type=str,
         default="lin_poly",
         choices=["euler", "lin_poly"],
-        help="Solver for the FlowMatcher.",
+        help="FlowMatcher 的求解器。",
     )
     parser.add_argument(
         "--lin_poly_p",
         type=int,
         default=5,
-        help="Degree of the polynomial in the linear stage.",
+        help="线性阶段多项式的次数。",
     )
     parser.add_argument(
         "--lin_poly_long_step",
         type=int,
         default=1000,
-        help="Number of steps to mimic slope in the linear stage.",
+        help="在线性阶段模拟斜率的步数。",
     )
-    ### FM parameters ###
+    ### FM 参数 ###
 
-    ### Eval Model ###
+    ### 评估模型 ###
     parser.add_argument(
         "--mode",
         type=str,
         default="75",
-        help="Evaluation mode: epoch number (e.g., '75'), 'best', or 'last'.",
+        help="评估模式: epoch 编号（例如，'75'）、'best' 或 'last'。",
     )
     parser.add_argument(
         "--save_for_vis",
         default=False,
         action="store_true",
-        help="Save predictions for visualization.",
+        help="保存预测结果用于可视化。",
     )
 
     return parser.parse_args()
 
 
 def init_basics(args):
-    """
-    Init the basic configurations for the experiment.
+    """初始化实验的基本配置
+    
+    Args:
+        args: 命令行参数
+    
+    Returns:
+        cfg: 配置对象
+        logger: 日志记录器
+        tb_log: TensorBoard 日志记录器
     """
 
-    """Load the config file"""
+    """加载配置文件"""
     result_dir = args.ckpt_dir
     if args.cfg == "auto":
         yml_ls = glob(result_dir + "/*.yml")
@@ -175,7 +190,7 @@ def init_basics(args):
     if args.fold_name != "tbd":
         tag += f"{args.fold_name}_"
 
-    ### Update data versions ###
+    ### 更新数据版本 ###
     if args.data_source == "original":
         tag += "orig_"
     elif args.data_source == "gt_matching":
@@ -187,7 +202,7 @@ def init_basics(args):
     else:
         raise ValueError(f"Invalid data source: {args.data_source}")
 
-    ### Update FM parameters ###
+    ### 更新 FM 参数 ###
     def _update_fm_params(args, cfg, tag):
         if cfg.denoising_method == "fm":
             cfg.sampling_steps = args.sampling_steps
@@ -212,7 +227,7 @@ def init_basics(args):
 
     def _update_optimization_params(args, cfg, tag):
         if args.batch_size is not None:
-            # override the batch size
+            # 覆盖批大小
             cfg.train_batch_size = args.batch_size
             cfg.val_batch_size = args.batch_size
             cfg.test_batch_size = args.batch_size
@@ -220,7 +235,7 @@ def init_basics(args):
 
     cfg, tag = _update_optimization_params(args, cfg, tag)
 
-    ### voila, create the saving directory ###
+    ### 创建保存目录 ###
     tag += "_test_set"
 
     tag += f"_{args.mode}"
@@ -228,26 +243,45 @@ def init_basics(args):
     cfg.device = "cuda" if torch.cuda.is_available() else "cpu"
     logger = cfg.create_dirs(tag_suffix=tag)
 
-    """fix random seed"""
+    """固定随机种子"""
     if args.fix_random_seed:
         set_random_seed(args.seed)
 
-    """set up tensorboard and text log"""
+    """设置 tensorboard 和文本日志"""
     tb_dir = os.path.abspath(os.path.join(cfg.log_dir, "../tb_eval"))
     os.makedirs(tb_dir, exist_ok=True)
     tb_log = SummaryWriter(log_dir=tb_dir)
 
-    """print the config file"""
+    """打印配置文件"""
     log_config_to_file(cfg.yml_dict, logger=logger)
     return cfg, logger, tb_log
 
 
 def build_data_loader(cfg, args, mode="train"):
-    """
-    Build the data loader for the NBA dataset.
+    """构建数据加载器
+    
+    Args:
+        cfg: 配置对象
+        args: 命令行参数
+        mode: 模式，可选值为 "train" 或 "eval"
+    
+    Returns:
+        数据加载器字典或测试数据加载器
     """
 
     def build_loader(cfg, args, split, batch_size, shuffle):
+        """构建单个数据加载器
+        
+        Args:
+            cfg: 配置对象
+            args: 命令行参数
+            split: 数据分割（train/val/test）
+            batch_size: 批大小
+            shuffle: 是否打乱数据
+        
+        Returns:
+            数据加载器
+        """
         dset = EgoTrajDataset(
             cfg=cfg,
             split=split,
@@ -293,15 +327,24 @@ def build_data_loader(cfg, args, mode="train"):
 
 
 def build_network(cfg, args, logger):
+    """构建去噪模型网络
+    
+    Args:
+        cfg: 配置对象
+        args: 命令行参数
+        logger: 日志记录器
+    
+    Returns:
+        去噪器模型
     """
-    Build the network for the denoising model.
-    """
+    # 构建 BiFlow 模型
     model = BiFlowModel(
         model_config=cfg.MODEL,
         logger=logger,
         config=cfg,
     )
 
+    # 构建 Flow Matcher
     if cfg.denoising_method == "fm":
         denoiser = BiFlowMatcher(
             cfg,
@@ -317,11 +360,23 @@ def build_network(cfg, args, logger):
 
 
 def prepare_eval_context(args):
-    """Prepare runtime env, config, loaders, and evaluation mode."""
+    """准备评估的运行环境、配置、加载器和评估模式
+    
+    Args:
+        args: 命令行参数
+    
+    Returns:
+        cfg: 配置对象
+        logger: 日志记录器
+        tb_log: TensorBoard 日志记录器
+        test_loader: 测试数据加载器
+        eval_mode: 评估模式
+    """
 
+    # 设置 GPU 设备
     os.environ["CUDA_VISIBLE_DEVICES"] = args.gpu
 
-    # Auto-set data_dir based on fold_name if not specified
+    # 如果未指定，根据 fold_name 自动设置 data_dir
     if args.data_dir is None:
         if args.fold_name == "tbd":
             args.data_dir = "./data/egotraj"
@@ -330,15 +385,17 @@ def prepare_eval_context(args):
 
     assert args.ckpt_dir is not None, "Must specify --ckpt_dir for evaluation."
 
-    # Parse mode: "best", "last", or integer epoch number
+    # 解析模式: "best", "last", 或整数 epoch 编号
     eval_mode = args.mode
     if eval_mode not in ("best", "last"):
         eval_mode = int(eval_mode)
 
+    # 初始化基本配置
     cfg, logger, tb_log = init_basics(args)
 
+    # 检查配置中是否有归一化参数
     if cfg.get("fut_traj_min", None) is None:
-        # Old checkpoint without norm params in yml — must compute from train data
+        # 旧检查点没有 yml 中的归一化参数 — 必须从训练数据计算
         _train_loader, _val_loader, test_loader = build_data_loader(
             cfg, args, mode="train"
         )
@@ -349,13 +406,17 @@ def prepare_eval_context(args):
 
 
 def main():
-    """Main function to evaluate the BiFlow model."""
+    """评估 BiFlow 模型的主函数"""
 
+    # 解析命令行参数
     args = parse_config()
+    # 准备评估上下文
     cfg, logger, tb_log, test_loader, eval_mode = prepare_eval_context(args)
 
+    # 构建网络
     denoiser = build_network(cfg, args, logger)
 
+    # 创建训练器
     trainer = BiFlowTrainer(
         cfg=cfg,
         denoiser=denoiser,
@@ -369,8 +430,11 @@ def main():
         ema_update_every=1,
     )
 
+    # 执行测试
     trainer.test(mode=eval_mode, save_for_vis=args.save_for_vis)
+    # 清空 GPU 缓存
     torch.cuda.empty_cache()
+    # 打印评估信息
     print("--------------------------------")
     print("ckpt_dir: ", args.ckpt_dir)
     print("data_source: ", args.data_source)
